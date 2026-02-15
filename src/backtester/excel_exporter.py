@@ -2,7 +2,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 
-def export_to_excel(yearly_results: dict, output_path: str):
+def export_to_excel(yearly_results: dict, output_path: str, year: int = 2023):
     wb = Workbook()
     wb.remove(wb.active)
 
@@ -16,27 +16,26 @@ def export_to_excel(yearly_results: dict, output_path: str):
         settlement = month_result.get("settlement_date")
         closing = month_result.get("closing_price", 0)
 
-        group_row = len(tree_sheet.iter_rows(min_row=1)) + 1
-        tree_sheet.append([f"2023-{month:02d}", "", "", "", "", "", "", closing, month_result["total_pnl"]])
+        tree_sheet.append([f"{year}-{month:02d}", "", "", "", "", "", "", closing, month_result["total_pnl"]])
 
         for idx, pos in enumerate(month_result["positions"], 1):
             date_str = pos["date"].strftime("%Y-%m-%d")
             total_prem = (400 + 600) * 50
 
             tree_sheet.append([
-                f"2023-{month:02d}", "賣出買權", date_str, pos["sell_call_strike"], "",
+                f"{year}-{month:02d}", "賣出買權", date_str, pos["sell_call_strike"], "",
                 400, 20000, closing, pos.get("call_pnl", 0)
             ])
             tree_sheet.append([
-                f"2023-{month:02d}", "賣出賣權", date_str, "", pos["sell_put_strike"],
+                f"{year}-{month:02d}", "賣出賣權", date_str, "", pos["sell_put_strike"],
                 600, 30000, closing, pos.get("put_pnl", 0)
             ])
             tree_sheet.append([
-                f"2023-{month:02d}", "買權避險單", date_str, pos["call_buy_strike"], pos["call_sell_strike"],
+                f"{year}-{month:02d}", "買權避險單", date_str, pos["call_buy_strike"], pos["call_sell_strike"],
                 200, 10000, closing, pos.get("call_spread_pnl", 0)
             ])
             tree_sheet.append([
-                f"2023-{month:02d}", "賣權避險單", date_str, pos["put_buy_strike"], pos["put_sell_strike"],
+                f"{year}-{month:02d}", "賣權避險單", date_str, pos["put_buy_strike"], pos["put_sell_strike"],
                 200, 10000, closing, pos.get("put_spread_pnl", 0)
             ])
 
@@ -45,7 +44,7 @@ def export_to_excel(yearly_results: dict, output_path: str):
     months = []
     pnls = []
     for month, month_result in yearly_results.items():
-        months.append(f"2023-{month:02d}")
+        months.append(f"{year}-{month:02d}")
         pnls.append(month_result["total_pnl"])
 
     pnl_sheet.append(["月份", "總損益"])

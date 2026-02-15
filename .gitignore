@@ -1,2 +1,15 @@
 # Worktrees directory
 worktrees/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Test outputs
+test_results.xlsx
+test_integration_results.xlsx
+*.xlsx
+

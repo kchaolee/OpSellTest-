@@ -8,7 +8,7 @@ def test_config_initialization():
         get_sell_put_point=600,
         cost_buy_call_point=200,
         cost_buy_put_point=200,
-        max_order=5
+        max_order=2
     )
     assert config.n == 3
     assert config.get_sell_call_point == 400

@@ -8,21 +8,48 @@ def get_third_wednesday(year: int, month: int) -> datetime:
     third_wednesday = wednesday + 14
     return datetime(year, month, third_wednesday)
 
+def get_third_thursday(year: int, month: int) -> datetime:
+    first_day = weekday(year, month, 1)
+    thursday = (3 - first_day) % 7 + 1
+    third_thursday = thursday + 14
+    return datetime(year, month, third_thursday)
+
 def find_settlement_dates(df: pd.DataFrame, year: int) -> dict:
-    df_filtered = df[df["日期"].dt.year == year].copy()
+    df_all = df.copy()
     result = {}
 
     for month in range(1, 13):
         third_wed = get_third_wednesday(year, month)
-
-        exact = df_filtered[df_filtered["日期"] == third_wed]
-        if not exact.empty:
-            result[month] = third_wed
+        
+        prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
+        third_thu_prev = get_third_thursday(prev_year, prev_month)
+        
+        wed_exact = df_all[df_all["日期"] == third_wed]
+        if not wed_exact.empty:
+            settlement_date = third_wed
         else:
-            after = df_filtered[df_filtered["日期"] > third_wed]
-            if not after.empty:
-                result[month] = after["日期"].iloc[0]
+            wed_after = df_all[df_all["日期"] > third_wed]
+            if not wed_after.empty:
+                settlement_date = wed_after["日期"].iloc[0]
             else:
-                result[month] = None
+                settlement_date = None
+        
+        if settlement_date is None:
+            continue
+            
+        thu_exact = df_all[df_all["日期"] == third_thu_prev]
+        if not thu_exact.empty:
+            start_date = third_thu_prev
+        else:
+            thu_after = df_all[df_all["日期"] > third_thu_prev]
+            if not thu_after.empty:
+                start_date = thu_after["日期"].iloc[0]
+            else:
+                continue
+        
+        result[month] = {
+            "start_date": start_date,
+            "settlement_date": settlement_date
+        }
 
     return result

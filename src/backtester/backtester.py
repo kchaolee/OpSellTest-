@@ -1,24 +1,39 @@
 import pandas as pd
-from .position_generator import generate_positions
-from .settlement import find_settlement_dates
-from .pnl_calculator import (
-    calculate_sold_call_pnl, calculate_sold_put_pnl,
-    calculate_call_spread_pnl, calculate_put_spread_pnl,
-    calculate_total_pnl
-)
+try:
+    from .position_generator import generate_positions
+    from .settlement import find_settlement_dates
+    from .pnl_calculator import (
+        calculate_sold_call_pnl, calculate_sold_put_pnl,
+        calculate_call_spread_pnl, calculate_put_spread_pnl,
+        calculate_total_pnl
+    )
+except ImportError:
+    from backtester.position_generator import generate_positions
+    from backtester.settlement import find_settlement_dates
+    from backtester.pnl_calculator import (
+        calculate_sold_call_pnl, calculate_sold_put_pnl,
+        calculate_call_spread_pnl, calculate_put_spread_pnl,
+        calculate_total_pnl
+    )
 
 def run_monthly_backtest(df: pd.DataFrame, config, year: int, month: int) -> dict:
     settlement_dates = find_settlement_dates(df, year)
-    settlement_date = settlement_dates.get(month, None)
+    month_dates = settlement_dates.get(month, None)
+    
+    if month_dates is None:
+        return {"positions": [], "settlement_date": None, "start_date": None, "total_pnl": 0}
+    
+    start_date = month_dates["start_date"]
+    settlement_date = month_dates["settlement_date"]
 
-    positions = generate_positions(df, config, year, month, settlement_date)
+    positions = generate_positions(df, config, year, month, start_date, settlement_date)
 
-    if not positions or settlement_date is None:
-        return {"positions": [], "settlement_date": settlement_date, "total_pnl": 0}
+    if not positions:
+        return {"positions": [], "settlement_date": settlement_date, "start_date": start_date, "total_pnl": 0}
 
     settlement_row = df[df["日期"] == settlement_date]
     if settlement_row.empty:
-        closing_price = df[df["日期"].dt.month == month].iloc[-1]["收盤"]
+        closing_price = df[df["日期"] <= settlement_date].iloc[-1]["收盤"]
     else:
         closing_price = settlement_row.iloc[0]["收盤"]
 
@@ -59,6 +74,7 @@ def run_monthly_backtest(df: pd.DataFrame, config, year: int, month: int) -> dic
 
     return {
         "positions": position_results,
+        "start_date": start_date,
         "settlement_date": settlement_date,
         "closing_price": closing_price,
         "total_pnl": total_pnl

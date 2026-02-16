@@ -1,22 +1,20 @@
 import pandas as pd
 from datetime import datetime
 
-def generate_positions(df: pd.DataFrame, config, year: int, month: int, settlement_date: datetime = None) -> list:
-    df_month = df[df["日期"].dt.month == month].copy()
+def generate_positions(df: pd.DataFrame, config, year: int, month: int, start_date: datetime = None, settlement_date: datetime = None) -> list:
+    if start_date is None or settlement_date is None:
+        return []
+    
+    df_period = df[(df["日期"] >= start_date) & (df["日期"] <= settlement_date)].copy()
 
-    if settlement_date is None:
-        settlement_date = df_month.iloc[-1]["日期"]
-
-    df_month = df_month[df_month["日期"] <= settlement_date].copy()
-
-    if len(df_month) == 0:
+    if len(df_period) == 0:
         return []
 
     positions = []
-    first_day = df_month.iloc[0]
+    first_day = df_period.iloc[0]
     base_index = first_day["開盤"]
 
-    for idx, row in df_month.iterrows():
+    for idx, row in df_period.iterrows():
         if len(positions) >= config.max_order:
             break
 
@@ -26,7 +24,7 @@ def generate_positions(df: pd.DataFrame, config, year: int, month: int, settleme
         trigger_high = base_index + trigger_distance
         trigger_low = base_index - trigger_distance
 
-        if row["最高"] >= trigger_high or row["最低"] <= trigger_low or idx == df_month.index[0]:
+        if row["最高"] >= trigger_high or row["最低"] <= trigger_low or idx == df_period.index[0]:
             pos = create_position(row["日期"], base_index, config)
             positions.append(pos)
             base_index = row["開盤"]
@@ -39,14 +37,14 @@ def generate_positions(df: pd.DataFrame, config, year: int, month: int, settleme
 
 def create_position(date: datetime, base_index: float, config) -> dict:
     n_percent = config.n / 100
-    sell_call_strike = base_index * (1 + n_percent)
-    sell_put_strike = base_index * (1 - n_percent)
+    sell_call_strike = int(base_index * (1 + n_percent))
+    sell_put_strike = int(base_index * (1 - n_percent))
 
-    call_buy_strike = sell_call_strike + config.get_sell_call_point
-    call_sell_strike = call_buy_strike + base_index * n_percent
+    call_buy_strike = int(sell_call_strike + config.get_sell_call_point)
+    call_sell_strike = int(call_buy_strike + base_index * n_percent)
 
-    put_buy_strike = sell_put_strike - config.get_sell_put_point
-    put_sell_strike = put_buy_strike - base_index * n_percent
+    put_buy_strike = int(sell_put_strike - config.get_sell_put_point)
+    put_sell_strike = int(put_buy_strike - base_index * n_percent)
 
     return {
         "date": date,

@@ -1,5 +1,6 @@
 from src.backtester.position_generator import generate_positions
 from src.backtester.config import BacktestConfig
+from datetime import datetime
 
 def test_generate_single_position():
     config = BacktestConfig(n=3, max_order=1)
@@ -14,7 +15,10 @@ def test_generate_single_position():
     df = pd.DataFrame(df_data)
     df["日期"] = pd.to_datetime(df["日期"])
 
-    positions = generate_positions(df, config, 2023, 1)
+    start_date = datetime(2023, 1, 2)
+    settlement_date = datetime(2023, 1, 18)
+    
+    positions = generate_positions(df, config, 2023, 1, start_date, settlement_date)
     assert len(positions) == 1
     assert positions[0]["sell_call_strike"] == 30900
     assert positions[0]["sell_put_strike"] == 29100
@@ -32,7 +36,10 @@ def test_chain_based_monitoring():
     df = pd.DataFrame(df_data)
     df["日期"] = pd.to_datetime(df["日期"])
 
-    positions = generate_positions(df, config, 2023, 1)
+    start_date = datetime(2023, 1, 2)
+    settlement_date = datetime(2023, 1, 18)
+    
+    positions = generate_positions(df, config, 2023, 1, start_date, settlement_date)
     assert len(positions) >= 2
     assert positions[0]["base_index"] == 30000
     assert positions[0]["date"].strftime("%Y-%m-%d") == "2023-01-02"
@@ -50,5 +57,8 @@ def test_max_order_limit():
     df = pd.DataFrame(df_data)
     df["日期"] = pd.to_datetime(df["日期"])
 
-    positions = generate_positions(df, config, 2023, 1)
+    start_date = datetime(2023, 1, 2)
+    settlement_date = datetime(2023, 1, 18)
+    
+    positions = generate_positions(df, config, 2023, 1, start_date, settlement_date)
     assert len(positions) <= 2

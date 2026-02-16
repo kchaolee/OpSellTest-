@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./worktrees/backtesting/src"
+    ],
+    "editor.fontSize": 16,
+    "editor.fontVariations": true
+}

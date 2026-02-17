@@ -61,7 +61,7 @@ def main():
             end_month = args.end_month
             results = run_monthly_range_backtest(df, config, start_year, start_month, end_year, end_month)
         
-        export_to_excel(results, args.output)
+        export_to_excel(results, args.output, config.__dict__)
         
         print(f"回測完成！結果已儲存至 {args.output}")
     except Exception as e:

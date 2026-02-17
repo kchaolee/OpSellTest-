@@ -35,7 +35,7 @@ def test_full_backtest_pipeline():
             assert "positions" in result
             assert isinstance(result["positions"], list)
         
-        export_to_excel(results, output_path)
+        export_to_excel(results, output_path, config.__dict__)
         
         assert os.path.exists(output_path)
         
@@ -48,7 +48,7 @@ def test_full_backtest_pipeline():
         tree_sheet = wb["Tree View"]
         headers = [cell.value for cell in tree_sheet[1]]
         expected_headers = ["月份", "部位類型", "建立時間", "建立時加權指數", "賣出履約價", "買入履約價",
-                          "權利金點數", "權利金總額", "結算日收盤價", "總損益"]
+                          "權利金點數", "權利金總額", "結算日收盤價", "總損益", "組合部位損益"]
         assert headers == expected_headers
         
         pnl_sheet = wb["Monthly P&L"]

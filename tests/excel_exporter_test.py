@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from src.backtester.excel_exporter import export_to_excel
+from src.backtester.config import BacktestConfig
 
 def test_export_to_excel():
     yearly_results = {
@@ -28,8 +29,10 @@ def test_export_to_excel():
             "total_pnl": -10000
         }
     }
-
-    export_to_excel(yearly_results, "test_output.xlsx")
+    
+    config = BacktestConfig()
+    
+    export_to_excel(yearly_results, "test_output.xlsx", config.__dict__)
 
     assert os.path.exists("test_output.xlsx")
     os.remove("test_output.xlsx")

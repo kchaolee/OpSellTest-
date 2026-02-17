@@ -32,7 +32,4 @@ def calculate_put_spread_pnl(closing_price: float, buy_strike: float,
 
 def calculate_total_pnl(config: dict, call_pnl: float, put_pnl: float,
                         call_spread_pnl: float, put_spread_pnl: float) -> float:
-    m = config["contract_multiplier"]
-    premium_income = (config["get_sell_call_point"] + config["get_sell_put_point"]) * m
-    hedge_cost = (config["cost_buy_call_point"] + config["cost_buy_put_point"]) * m
-    return premium_income - hedge_cost + call_pnl + put_pnl + call_spread_pnl + put_spread_pnl
+    return call_pnl + put_pnl + call_spread_pnl + put_spread_pnl

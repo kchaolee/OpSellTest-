@@ -57,5 +57,5 @@ def test_total_pnl_calculation():
     put_spread_pnl = -10000
 
     total = calculate_total_pnl(config, call_pnl, put_pnl, call_spread_pnl, put_spread_pnl)
-    expected = 400*50 + 600*50 - 200*50 - 200*50 + (-10000) + 0 + (-5000) + (-10000)
+    expected = call_pnl + put_pnl + call_spread_pnl + put_spread_pnl
     assert total == expected
